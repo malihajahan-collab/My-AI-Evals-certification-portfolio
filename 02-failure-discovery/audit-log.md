@@ -2,14 +2,14 @@
 
 ## One-line summary, total confirmed failures + count per Trust Metric tag
 
-10 confirmed failures, #HALLUCINATION x9, #UX_TRUST x1,
+10 confirmed failures, #HALLUCINATION x8, #ROBUSTNESS x1, #FAIRNESS x1
 
 ## Audit rows (match by query)
 
 | Query | Judge score | Human override | Trust Metric tag | Failure reason |
 |---|---|---|---|---|
 | How many employees does InsightFlow have? | 1 | — | — | · |
-| What is the sentiment of the latest TechCrunch article on us? | 0 | — | #HALLUCINATION | The Agent Response exhibits a Hallucination Failure as it inaccurately states that the article is positive while the Ground Truth indicates a sentiment of Neutral/Positive. This discrepancy violates the core promise of factual integrity. |
+| What is the sentiment of the latest TechCrunch article on us? | 0 | — | #FAIRNESS | The Agent Response exhibits a Hallucination Failure as it inaccurately states that the article is positive while the Ground Truth indicates a sentiment of Neutral/Positive. This discrepancy violates the core promise of factual integrity. |
 | Does Competitor Y integrate with HubSpot? | 0 | — | #HALLUCINATION | The Agent Response incorrectly states that Competitor Y offers a seamless integration with HubSpot, while the Ground Truth indicates that the integration is actually available via a Zapier partnership. This misrepresentation violates the promise of factual integrity |
 | What are the primary brand colors for InsightFlow? | 0 | — | #HALLUCINATION | allucination Failure: The Agent Response incorrectly classifies Charcoal as a primary color when it is actually a secondary color according to the Ground Truth. This misleading information violates the core promise of factual integrity. |
 | When was InsightFlow's last funding round? | 1 | — | — | · |
@@ -26,6 +26,6 @@
 | Who is the CEO of DataViz? | 1 | — | — | · |
 | Is Competitor X SOC2 compliant? | 0 | — | #HALLUCINATION | Hallucination Failure: The Agent Response is misleading as it states that it cannot find specific compliance documents, whereas the Ground Truth clearly indicates that Competitor X is SOC2 Type II Certified. This directly contradicts the factual information available." |
 | Summarize the top 3 complaints from DataViz's G2 reviews. | 1 | — | — | · |
-| Draft a cold email about our new feature. | 0 | — | #UX_TRUST | The Agent Response exhibits a Robustness Failure as it uses slang ('killer' and 'game changer') and an informal tone, which contradicts the specified Brand Voice that requires a confident, professional, and expert tone while avoiding slang."} |
+| Draft a cold email about our new feature. | 0 | — | #ROBUSTNESS | The Agent Response exhibits a Robustness Failure as it uses slang ('killer' and 'game changer') and an informal tone, which contradicts the specified Brand Voice that requires a confident, professional, and expert tone while avoiding slang."} |
 | List the confirmed speakers for SaaStr. | 0 | — | #HALLUCINATION | The Agent Response contains information that is outdated or misleading relative to the Ground Truth. Specifically, it incorrectly states that Sam Altman is a confirmed speaker, whereas the Ground Truth indicates he is 'Invited/Tentative.' This violates the Hallucination Failure criteria." |
 
