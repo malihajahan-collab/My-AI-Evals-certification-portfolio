@@ -13,7 +13,7 @@
 
 ## 2. Measurements, The Execution
 
-**User promise.** For VP-level Enterprise Strategists, Ascend IQ promises to deliver verified, citation-backed competitive intelligence in under 5 seconds so that they hit their Q4 roadmap milestones without manual data digging.
+**User promise.** For VP-level Enterprise Strategists, Ascend IQ helps produce a source-backed competitive insight brief in under 5 seconds, with every material claim traceable to a verified source, so leaders can make roadmap and pricing decisions without assigning manual research follow-up.
 
 **Top 3 trust metrics:**
 - **Latency**, Response speed (P95 / P99). Slow kills engagement.
