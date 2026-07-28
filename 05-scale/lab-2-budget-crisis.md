@@ -1,25 +1,29 @@
-# Eval Budget
+# Lab 2, Ascend IQ Budget Crisis
 
-> Module 5 · Scale · repo file; the cost evidence behind your Ship/Hold slide's closed loop
->
-> What your eval system costs to run and how you keep it sustainable under a real budget constraint. Pairs with `lab-1-coverage-matrix.md`.
+**Quarterly budget cap:** $200,000
+**Total Level 3 spend:** $175,000 (3 of max 3 slots used)
 
-## Cost model
+## Portfolio decision grid
 
-| Cost driver | Estimate | Frequency | Notes |
-|---|---|---|---|
-| Model tokens (judge + runs) | _…_ | _…_ | _…_ |
-| Human review time | _…_ | _…_ | _…_ |
-| Infra / tracing | _…_ | _…_ | _…_ |
+| Failure | Trust metric | Risk | Level | Cost |
+| --- | --- | :---: | :---: | ---: |
+| Data Fabrication | Hallucination Rate | P0 | L3 | $85,000 |
+| Context Specificity | UX Trust | P1 | L2 | $7,000 |
+| Source Attribution Failure | Robustness | P1 | L3 | $65,000 |
+| Data Bias | Fairness | P2 | L2 | $5,500 |
+| Cost Overruns | Latency | P3 | L3 | $25,000 |
 
-## The Coverage × Cost × Velocity trade-off
+## Fallback methods (non-Level 3 items)
 
-_When the budget is cut, what do you drop first and why? What must stay to protect the P0 risks?_
+### L2 · Context Specificity (UX Trust · P1)
+- **Method:** Method: Deterministic Context-Coverage Checks + Weekly Human Audit Automated gate: Verify that responses reference required prompt dimensions—client, industry, geography, timeframe, requested metrics, and retrieved entities. Flag generic phrases, missing required fields, and responses with insufficient overlap with retrieved context. Weekly audit: Review 50–100 risk-stratified production outputs using a rubric for relevance, client specificity, actionable detail, completeness, and unsupported generalization. Ground truth: Pass when all required context dimensions are addressed, no essential client-specific fact is omitted, and the human-review score is at least 4/5. Cadence: Run deterministic checks in real time and before deployment; conduct the human audit weekly; expand sampling after prompt, model, or retrieval changes. Estimated cost: Approximately $7K–$12K per quarter, depending on audit volume.
+- **Why this fallback is defensible:** Context-specificity failures are usually visible, recoverable UX defects rather than irreversible safety failures. Deterministic checks can cheaply detect missing client, industry, geography, timeframe, and metric references, while weekly human audits assess whether those details are used meaningfully. Because weak specificity typically causes dissatisfaction or lower adoption—not legal or financial harm—L2 provides proportionate coverage. Any high-impact recommendation or repeated failure should escalate to L3.
 
-- **Cut first:** _…_
-- **Protect at all costs:** _…_
-- **Sampling cadence:** _lightweight checks daily · exhaustive suite at release_
+### L2 · Data Bias (Fairness · P2)
+- **Method:** Method: Retrieval-Balance Assertions + Counterfactual Spot-Checks + Weekly Human Audit Automated gate: Check source distribution across relevant regions, industries, company sizes, and other defined cohorts. For global queries, flag overrepresentation beyond an approved threshold, such as one region contributing more than 70% of retrieved evidence. Counterfactual checks: Replay paired prompts that change only a relevant demographic or geographic attribute. Flag material changes in factuality, completeness, tone, certainty, or recommendations when the source evidence is otherwise equivalent. Weekly audit: Review 50–100 risk-stratified outputs for systematic omission, stereotyping, unequal emphasis, unsupported demographic inference, and geographic preference. Ground truth: Pass when counterfactual outputs receive equivalent treatment, no severe stereotyping or unsupported inference occurs, and no cohort performs more than five percentage points below the overall quality baseline. Cadence: Run retrieval assertions in real time and counterfactual fixtures before releases; conduct human audits weekly and after model, prompt, retrieval, or dataset changes. Estimated cost: Approximately $5,500 per quarter.
+- **Why this fallback is defensible:** Data bias in summarization is primarily driven by retrieval distribution skew and keyword missingness, which can be bounded upstream.
+Because Data Bias is a P2 risk, spending $55,000/quarter on continuous LLM-as-a-Judge evaluations is economically inefficient. Simple metadata assertions at the retrieval stage (ensuring non-US context chunks Most bias risk in this constrained summarization use case originates in uneven retrieval and source representation, which deterministic controls can catch cheaply. Human review covers semantic bias that metadata checks cannot detect. This remains defensible only while the agent summarizes bounded enterprise data and does not make consequential decisions about individuals.
 
-## Fits in a quarter?
 
-_Show the total lands inside a realistic engineering budget._
+---
+_Generated by the M5 Budget Crisis Tool · AI Evals Certification._
