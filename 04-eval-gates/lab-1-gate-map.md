@@ -1,37 +1,48 @@
-# Eval Gates & Thresholds
+# Module 4 · Eval Gate Map · Ascend IQ Copilot
 
-> Module 4 · Eval Gates · repo file; feeds the Eval Gates slide of your final pitch deck
->
-> Where your eval suite plugs into the delivery lifecycle, and the thresholds that decide ship / hold.
+_Generated from the M4 Eval Gate Mapping Tool._
 
-## 1. Gate placement
+## Context
 
-_Where in the lifecycle does each gate sit, and what does it block?_
+Eng flagged 5 verified failures in the Ascend IQ data log. (Row 14, refused legal query, was correctly Pass and is not mapped.) Each row below assigns a severity (Advisory · Soft · Hard) and a pipeline placement (Pull Request · Staging Build · Release Build).
 
-| Gate | Lifecycle stage (PR / pre-deploy / canary / prod monitor) | What it blocks |
-|---|---|---|
-| _…_ | _…_ | _…_ |
+## Gate Map
 
-## 2. Thresholds
+| Row | Failure Mode | Severity | Placement | Rationale |
+|---|---|---|---|---|
+| 01 | Hallucination · Stale Pricing | 🔴 Hard | Staging Build | Unsupported pricing can cause underquoting, lost revenue, failed sales, customer disputes, and misleading-pricing exposure. Because pricing errors can directly affect purchasing decisions, critical contradictions must block promotion. |
+| 17 | Tone · Slang Detected | 🔵 Advisory | Pull Request | Repeated off-brand language can weaken enterprise credibility, reduce sales-message conversion, and gradually erode customer trust. Because ordinary slang presents limited immediate harm, it should generate an advisory warning rather than block release. |
+| 05 | Hallucination · False Promise | 🔴 Hard | Staging Build | Inventing confirmed speakers or commitments can force public corrections, damage partner relationships, trigger customer complaints, and erode brand trust. Externally published confirmation claims must be supported by authoritative evidence. |
+| 08 | Hallucination · Contradicts Specs | 🔴 Hard | Staging Build | Unsupported negative claims about a named competitor can create false-advertising or defamation exposure, competitor disputes, legal rev costs, and reputational damage. Unsupported comparative claims should block promotion. |
+| 03 | Latency · Exceeded Max Threshold | 🟡 Soft | Staging Build | Sustained response delays can increase abandonment, reduce feature adoption and task completion, raise support costs, breach enterprise service expectations, and contribute to churn. Occasional complex requests may use a documented exception threshold. |
 
-_The exact pass bar at each gate. Be specific, these are the numbers a release rides on._
+## Sample Interactions (for reference)
 
-| Metric | Gate | Threshold | If it fails… |
-|---|---|---|---|
-| _…_ | _…_ | _…_ | _block / warn / rollback_ |
+**Row 01 · Hallucination · Stale Pricing**
+- Input: What is InsightFlow's pricing for Enterprise?
+- Output: InsightFlow Enterprise starts at $49/user/month with a 10-seat minimum.
+- Eng reasoning: Hallucination, invented pricing numbers not in the source data.
 
-## 3. Human-in-the-loop
+**Row 17 · Tone · Slang Detected**
+- Input: Draft a cold email about our new feature.
+- Output: Hey! Check out this killer new feature, it's a total game changer for your stack!
+- Eng reasoning: Tone, slang violates brand-voice guidelines.
 
-_Which decisions require a human, and who is that human? What do they see?_
+**Row 05 · Hallucination · False Promise**
+- Input: List the confirmed speakers for SaaStr.
+- Output: Confirmed speakers include Jason Lemkin, Aaron Levie, and Sam Altman.
+- Eng reasoning: Hallucination, Sam Altman is not on the confirmed speaker list.
 
-## 4. Launch strategy
+**Row 08 · Hallucination · Contradicts Specs**
+- Input: Compare our API rate limits to Competitor Z.
+- Output: Our API is robust and developer-friendly. Competitor Z is known for strict throttling.
+- Eng reasoning: Hallucination, fabricates a comparison and disparages a named competitor.
 
-_How do you roll out behind these gates? (shadow → canary % → full). What signal promotes each stage?_
+**Row 03 · Latency · Exceeded Max Threshold**
+- Input: Summarize the top 3 complaints from DataViz's G2 reviews.
+- Output: Users report issues with mobile load times, lack of dark mode, and steep learning curve.
+- Eng reasoning: Latency, response time exceeded the max threshold (4.2s vs target 2.0s).
 
-## 5. Rollback & kill-switch
+---
 
-_What triggers a rollback, and how fast can you pull the feature?_
-
-## 6. Trade-off justification
-
-_Why these thresholds? What's the cost of too-strict (blocks good releases) vs too-loose (ships failures)?_
+_Lab artifact for Module 4, AI Evals Certification, Product School._
