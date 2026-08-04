@@ -8,7 +8,7 @@
 | **Risk Type** | Output |
 | **Trust Metric** | Hallucination |
 | **02 · Evaluator** | Hybrid |
-| **Detection logic** | Deterministic Regex Pre-Filter (Code-Based):Parse the LLM response for any monetary figures or currency formats (e.g., \$[0-9,]+(\.[0-9]{2})? or mentions of pricing tiers). If no currency figures are detected, pass the check immediately. 
+| **Detection logic** | Deterministic Regex Pre-Filter (Code-Based):Parse the LLM response for any monetary figures or currency formats (e.g. mentions of pricing tiers). If no currency figures are detected, pass the check immediately. 
 API Ground-Truth Comparison: For each detected price, cross-reference the extracted figure and associated product/tier against the live pricing_api.get_current_price(product_id) database.
 Pass: All extracted dollar amounts strictly match the API response. Fail/Block: Any amount deviates from the API response or references a non-existent tier $\rightarrow$ TRIGGER FALLBACK. |
 | **03 · Threshold** | 100% accuracy (0% tolerance for price discrepancies)  Calibration Floor: Cohen's κ ≥ 0.6 |
