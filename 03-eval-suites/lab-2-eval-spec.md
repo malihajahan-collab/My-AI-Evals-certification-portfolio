@@ -1,47 +1,66 @@
-# Eval Spec
+# M3 · Lab 2 · Eval Spec, Ascend IQ P0
 
-> Module 3 · Eval Suites · repo file; backs the Eval Results slide of your final pitch deck
->
-> The design of your automated evaluation suite: the datasets, evaluators, and pass criteria that turn your taxonomy into a repeatable test.
+## Part 1 · The 5-Part Eval Spec
 
-## 1. Datasets
+| Question | Answer |
+|---|---|
+| **01 · Target Risk** | Hallucinated pricing |
+| **Risk Type** | Output |
+| **Trust Metric** | Hallucination |
+| **02 · Evaluator** | Hybrid |
+| **Detection logic** | Deterministic Regex Pre-Filter (Code-Based):Parse the LLM response for any monetary figures or currency formats (e.g., \$[0-9,]+(\.[0-9]{2})? or mentions of pricing tiers). If no currency figures are detected, pass the check immediately. 
+API Ground-Truth Comparison: For each detected price, cross-reference the extracted figure and associated product/tier against the live pricing_api.get_current_price(product_id) database.
+Pass: All extracted dollar amounts strictly match the API response. Fail/Block: Any amount deviates from the API response or references a non-existent tier $\rightarrow$ TRIGGER FALLBACK. |
+| **03 · Threshold** | 100% accuracy (0% tolerance for price discrepancies)  Calibration Floor: Cohen's κ ≥ 0.6 |
+| **Strategy** | Safety First (max TPR) |
+| **04 · Business Stakes** | Quoting incorrect pricing in a B2B sales context carries severe operational and financial impacts:
 
-_What examples does the suite run against, and where do they come from?_
+Revenue-Recognition & Contractual Liability: Misquoting prices creates legal friction during contract closing, risking mandatory honors of discounted quotes or costly legal disputes.
 
-| Dataset | Purpose | # examples | Source |
-|---|---|---|---|
-| _Golden set_ | _known-good reference cases_ | _…_ | _…_ |
-| _Failure set_ | _cases that previously broke_ | _…_ | _…_ |
-| _Edge set_ | _adversarial / rare inputs_ | _…_ | _…_ |
+SLA & Compliance Penalties: Enterprise agreements often include strict SLA clauses regarding accurate data and quote delivery.
 
-## 2. Evaluators
+Immediate Trust Erosion: Presenting inaccurate figures damages credibility with prospective buyers, stalling deals, increasing sales cycle lengths, or causing immediate customer churn to competitors. |
+| **05 · Owner** | Product Manager.Eng. Lead as a deligated reviewer |
 
-_One row per evaluator. Tie each back to a failure mode from Module 2._
 
-| Evaluator | Type (code / LLM-judge / human) | Failure mode it catches | Output (score / pass-fail) |
-|---|---|---|---|
-| _…_ | _…_ | _…_ | _…_ |
+## Part 2 · Three Audience Messages
 
-## 3. LLM-as-judge prompts (if used)
+### A. For Engineering (Jira ticket)
+Title: [Eval Spec] Enforce 100% Accuracy Guardrail on Pricing Outputs
 
-_Paste the judge prompt(s). Note how you calibrated them against human labels._
+Acceptance Criteria:
+- GIVEN a user prompt or agent execution path that targets pricing information, WHEN the LLM output contains currency figures or pricing tier references,   THEN pass all extracted figures to `pricing_api.get_current_price(product_id)` for verification.
+  
+- IF any dollar amount or tier name in the response does NOT strictly match the API payload (or if the tier does not exist),   THEN immediately block the LLM response from reaching the client and trigger the fallback handler.
 
-```
-[judge prompt here]
-```
+- IF no pricing figures/tiers are detected in the response, THEN pass the message through without blocking.
 
-## 4. Pass criteria
+Test Coverage: 
+- 100% pass required across the 20 historical pricing test cases in the eval suite. Zero price discrepancies tolerated.
 
-_What score/threshold per evaluator counts as a pass? What's the aggregate bar for the suite?_
+### B. For UX / Design
+Design Note: Pricing Guardrail Fallback Experience
 
-## 5. How to run it
+When the pricing detection logic blocks an inaccurate or unverified price from being shown:
+1. Fallback UI State:
+   - Surface an inline card or polite system response:  "We’re unable to verify live pricing for this item right now. Please get in touch with our sales team or check our official pricing page for up-to-date quotes."
+   - Primary CTA: "Contact Sales" (opens modal/lead form).
+   - Secondary CTA: "View Pricing Page" (opens external URL in new tab).
 
-_Commands / steps to reproduce the suite (LangSmith experiment, script, etc.)._
+2. Context & Guardrails:
+   - NEVER expose raw status codes, trace errors, or phrases like "Hallucinated pricing detected."
+   - Maintain the existing conversation context without resetting the session history.
 
-## 6. Baseline results
+### C. For Leadership (bi-weekly update)
+Status Update: Enforced 100% Accuracy Pricing Guardrail on Assistant
 
-_First run of the suite against current production. Where does it stand today?_
+- Risk Mitigated: Eliminated hallucinated pricing outputs in sales & support conversations, protecting us against revenue-recognition liability, contractual disputes, and deal erosion.
+- Gate Logic: Implemented a hybrid code-based filter that cross-checks all LLM-generated dollar values against our live backend pricing database before rendering.
+- Threshold & Policy: Set to a strict 100% accuracy requirement (Safety-First / 0% tolerance for price discrepancies) with an automated human/sales fallback when figures cannot be verified.
 
-| Evaluator | Score | Pass? |
-|---|---|---|
-| _…_ | _…_ | _…_ |
+---
+
+_Save this to `03-eval-suites/lab-2-eval-spec.md` in your repo (the repo is your submission). It underpins the Eval Results slide of your final pitch deck._
+
+_Generated by the M3 Eval Spec Builder._
+
