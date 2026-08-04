@@ -1,29 +1,44 @@
-# Lab 2, Ascend IQ Budget Crisis
+# Lab 2 · Budget Crisis · Ascend IQ
 
-**Quarterly budget cap:** $200,000
-**Total Level 3 spend:** $175,000 (3 of max 3 slots used)
+**Quarterly budget cap:** $200,000  
+**Portfolio spend:** $187,500  
+**Budget remaining:** $12,500  
+**Level 3 spend:** $175,000  
+**Level 3 slots used:** 3 of 3
 
 ## Portfolio decision grid
 
-| Failure | Trust metric | Risk | Level | Cost |
-| --- | --- | :---: | :---: | ---: |
-| Data Fabrication | Hallucination Rate | P0 | L3 | $85,000 |
-| Context Specificity | UX Trust | P1 | L2 | $7,000 |
-| Source Attribution Failure | Robustness | P1 | L3 | $65,000 |
-| Data Bias | Fairness | P2 | L2 | $5,500 |
-| Cost Overruns | Latency | P3 | L3 | $25,000 |
+| Failure mode | Trust metric | Risk | Coverage level | Quarterly cost |
+|---|---|:---:|:---:|---:|
+| Data Fabrication | Hallucination | P0 | **L3** | **$85,000** |
+| Context Specificity | UX Trust | P1 | **L2** | **$7,000** |
+| Source Attribution Failure | Robustness | P1 | **L3** | **$65,000** |
+| Data Bias | Fairness | P2 | **L2** | **$5,500** |
+| Cost Overruns | Latency / Efficiency | P3 | **L3** | **$25,000** |
+| **Total** |  |  |  | **$187,500** |
 
-## Fallback methods (non-Level 3 items)
+## Portfolio rationale
 
-### L2 · Context Specificity (UX Trust · P1)
-- **Method:** Method: Deterministic Context-Coverage Checks + Weekly Human Audit Automated gate: Verify that responses reference required prompt dimensions—client, industry, geography, timeframe, requested metrics, and retrieved entities. Flag generic phrases, missing required fields, and responses with insufficient overlap with retrieved context. Weekly audit: Review 50–100 risk-stratified production outputs using a rubric for relevance, client specificity, actionable detail, completeness, and unsupported generalization. Ground truth: Pass when all required context dimensions are addressed, no essential client-specific fact is omitted, and the human-review score is at least 4/5. Cadence: Run deterministic checks in real time and before deployment; conduct the human audit weekly; expand sampling after prompt, model, or retrieval changes. Estimated cost: Approximately $7K–$12K per quarter, depending on audit volume.
-- **Why this fallback is defensible:** Context-specificity failures are usually visible, recoverable UX defects rather than irreversible safety failures. Deterministic checks can cheaply detect missing client, industry, geography, timeframe, and metric references, while weekly human audits assess whether those details are used meaningfully. Because weak specificity typically causes dissatisfaction or lower adoption—not legal or financial harm—L2 provides proportionate coverage. Any high-impact recommendation or repeated failure should escalate to L3.
+The portfolio funds the P0 Data Fabrication risk and the most dangerous P1 Source Attribution risk at Level 3. Unsupported citations can appear authoritative and survive superficial customer review, creating contractual, compliance, and trust exposure. Context Specificity is downgraded because generic responses are normally visible and recoverable. Cost Overruns receives the third Level 3 slot because continuous telemetry and automated controls fit within the remaining budget at comparatively low cost.
 
-### L2 · Data Bias (Fairness · P2)
-- **Method:** Method: Retrieval-Balance Assertions + Counterfactual Spot-Checks + Weekly Human Audit Automated gate: Check source distribution across relevant regions, industries, company sizes, and other defined cohorts. For global queries, flag overrepresentation beyond an approved threshold, such as one region contributing more than 70% of retrieved evidence. Counterfactual checks: Replay paired prompts that change only a relevant demographic or geographic attribute. Flag material changes in factuality, completeness, tone, certainty, or recommendations when the source evidence is otherwise equivalent. Weekly audit: Review 50–100 risk-stratified outputs for systematic omission, stereotyping, unequal emphasis, unsupported demographic inference, and geographic preference. Ground truth: Pass when counterfactual outputs receive equivalent treatment, no severe stereotyping or unsupported inference occurs, and no cohort performs more than five percentage points below the overall quality baseline. Cadence: Run retrieval assertions in real time and counterfactual fixtures before releases; conduct human audits weekly and after model, prompt, retrieval, or dataset changes. Estimated cost: Approximately $5,500 per quarter.
-- **Why this fallback is defensible:** Data bias in summarization is primarily driven by retrieval distribution skew and keyword missingness, which can be bounded upstream.
-Because Data Bias is a P2 risk, spending $55,000/quarter on continuous LLM-as-a-Judge evaluations is economically inefficient. Simple metadata assertions at the retrieval stage (ensuring non-US context chunks Most bias risk in this constrained summarization use case originates in uneven retrieval and source representation, which deterministic controls can catch cheaply. Human review covers semantic bias that metadata checks cannot detect. This remains defensible only while the agent summarizes bounded enterprise data and does not make consequential decisions about individuals.
+## Fallback methods
 
+### L2 · Context Specificity · UX Trust · P1
 
----
-_Generated by the M5 Budget Crisis Tool · AI Evals Certification._
+- **Automated check:** Verify that responses address required prompt dimensions, including customer, industry, geography, timeframe, requested metrics, and retrieved entities. Flag generic phrases and missing required dimensions.
+- **Replay:** Run versioned client-specific fixtures before every prompt, retrieval, or model change.
+- **Human audit:** Review **50–100 risk-stratified production outputs weekly** for relevance, specificity, completeness, and actionable detail.
+- **Pass criteria:** At least **95%** of audited outputs score **4/5 or higher**, with no missing critical customer context.
+- **Escalation:** Move to L3 if the pass rate falls below 95% for two consecutive audits or a context failure materially affects a customer decision.
+
+**Incident-review defense:** Context-specificity failures are normally visible and recoverable UX defects. Deterministic checks catch missing required context cheaply, while weekly human review evaluates whether the context is used meaningfully. High-impact recommendations are excluded from this downgrade and remain subject to stronger factuality controls.
+
+### L2 · Data Bias · Fairness · P2
+
+- **Automated check:** Measure retrieved-source distribution across relevant regions, industries, company sizes, languages, and defined cohorts.
+- **Counterfactual replay:** Change only one relevant demographic or geographic attribute and compare factuality, completeness, tone, certainty, and recommendations.
+- **Human audit:** Review **50–100 risk-stratified outputs weekly** for systematic omission, unequal emphasis, stereotyping, and unsupported demographic inference.
+- **Pass criteria:** Zero severe stereotyping or unsupported protected-characteristic inference; at least **99% counterfactual consistency**; no cohort more than **five percentage points** below the overall quality baseline.
+- **Escalation:** Move to L3 after any severe fairness incident, expansion into consequential decisions about individuals, or two consecutive audits showing systematic disparity.
+
+**Incident-review defense:** Ascend IQ summarizes bounded Enterprise information rather than making employment, credit, healthcare, or other consequential decisions about individuals. Upstream representation checks address retrieval skew cheaply, while counterfactual fixtures and human audits cover semantic disparities that metadata checks cannot detect.
