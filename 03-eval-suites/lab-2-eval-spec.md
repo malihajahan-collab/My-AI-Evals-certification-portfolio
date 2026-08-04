@@ -1,66 +1,51 @@
-# M3 · Lab 2 · Eval Spec, Ascend IQ P0
+# Lab 2 · Eval Spec · Ascend IQ Pricing Integrity
 
-## Part 1 · The 5-Part Eval Spec
+## Five-part Eval Spec
 
-| Question | Answer |
-|---|---|
-| **01 · Target Risk** | Hallucinated pricing |
-| **Risk Type** | Output |
-| **Trust Metric** | Hallucination |
-| **02 · Evaluator** | Hybrid |
-| **Detection logic** | Deterministic Regex Pre-Filter (Code-Based):Parse the LLM response for any monetary figures or currency formats (e.g. mentions of pricing tiers). If no currency figures are detected, pass the check immediately. 
-API Ground-Truth Comparison: For each detected price, cross-reference the extracted figure and associated product/tier against the live pricing_api.get_current_price(product_id) database.
-Pass: All extracted dollar amounts strictly match the API response. Fail/Block: Any amount deviates from the API response or references a non-existent tier $\rightarrow$ TRIGGER FALLBACK. |
-| **03 · Threshold** | 100% accuracy (0% tolerance for price discrepancies)  Calibration Floor: Cohen's κ ≥ 0.6 |
-| **Strategy** | Safety First (max TPR) |
-| **04 · Business Stakes** | Quoting incorrect pricing in a B2B sales context carries severe operational and financial impacts:
+### 1. Target risk
 
-Revenue-Recognition & Contractual Liability: Misquoting prices creates legal friction during contract closing, risking mandatory honors of discounted quotes or costly legal disputes.
+- **Failure mode:** Fabricated or stale Enterprise pricing, including unsupported or contradicted prices, currencies, discounts, seat minimums, and contract terms.
+- **Risk type:** Output — final-answer factuality.
+- **Trust metric:** Hallucination.
+- **Severity:** P0.
 
-SLA & Compliance Penalties: Enterprise agreements often include strict SLA clauses regarding accurate data and quote delivery.
+### 2. Evaluator
 
-Immediate Trust Erosion: Presenting inaccurate figures damages credibility with prospective buyers, stalling deals, increasing sales cycle lengths, or causing immediate customer churn to competitors. |
-| **05 · Owner** | Product Manager.Eng. Lead as a deligated reviewer |
+**Hybrid evaluation:**
 
+1. A deterministic gate extracts every pricing claim and compares it with the versioned approved pricing source. Any mismatched or unsupported claim blocks the response.
+2. A semantic LLM-as-Judge from a different model family runs against the versioned pricing regression set to detect paraphrased, implied, or context-dependent contradictions that deterministic matching may miss.
 
-## Part 2 · Three Audience Messages
+The product-wide safety/refusal evaluator remains active, but it is not counted as a pricing-factuality control.
 
-### A. For Engineering (Jira ticket)
-Title: [Eval Spec] Enforce 100% Accuracy Guardrail on Pricing Outputs
+### 3. Threshold and strategy
 
-Acceptance Criteria:
-- GIVEN a user prompt or agent execution path that targets pricing information, WHEN the LLM output contains currency figures or pricing tier references,   THEN pass all extracted figures to `pricing_api.get_current_price(product_id)` for verification.
-  
-- IF any dollar amount or tier name in the response does NOT strictly match the API payload (or if the tier does not exist),   THEN immediately block the LLM response from reaching the client and trigger the fallback handler.
+- **Strategy:** Safety First.
+- **Threshold:** 100% of pricing claims must be supported by the approved pricing source.
+- **Critical-failure tolerance:** Zero contradicted or unsupported critical pricing claims.
+- **Judge calibration floor:** Cohen’s κ ≥ 0.60 against human labels.
+- **Release rule:** Any critical pricing failure blocks release.
 
-- IF no pricing figures/tiers are detected in the response, THEN pass the message through without blocking.
+### 4. Business stakes
 
-Test Coverage: 
-- 100% pass required across the 20 historical pricing test cases in the eval suite. Zero price discrepancies tolerated.
+An unsupported price can mislead a customer’s strategic decision, trigger contract disputes or legal review, and jeopardize a $50K+ Enterprise account. The control protects Ascend IQ’s promise of verified, citation-backed intelligence for customers making high-stakes decisions.
 
-### B. For UX / Design
-Design Note: Pricing Guardrail Fallback Experience
+### 5. Owner
 
-When the pricing detection logic blocks an inaccurate or unverified price from being shown:
-1. Fallback UI State:
-   - Surface an inline card or polite system response:  "We’re unable to verify live pricing for this item right now. Please get in touch with our sales team or check our official pricing page for up-to-date quotes."
-   - Primary CTA: "Contact Sales" (opens modal/lead form).
-   - Secondary CTA: "View Pricing Page" (opens external URL in new tab).
+The **Group PM** is accountable for the release policy and risk acceptance. The **Engineering Lead** is responsible for implementing the gate, maintaining the approved-source integration, enforcing blocks, and operating rollback.
 
-2. Context & Guardrails:
-   - NEVER expose raw status codes, trace errors, or phrases like "Hallucinated pricing detected."
-   - Maintain the existing conversation context without resetting the session history.
+## Three audience messages
 
-### C. For Leadership (bi-weekly update)
-Status Update: Enforced 100% Accuracy Pricing Guardrail on Assistant
+### A. Engineering · Jira acceptance criteria
 
-- Risk Mitigated: Eliminated hallucinated pricing outputs in sales & support conversations, protecting us against revenue-recognition liability, contractual disputes, and deal erosion.
-- Gate Logic: Implemented a hybrid code-based filter that cross-checks all LLM-generated dollar values against our live backend pricing database before rendering.
-- Threshold & Policy: Set to a strict 100% accuracy requirement (Safety-First / 0% tolerance for price discrepancies) with an automated human/sales fallback when figures cannot be verified.
+> **GIVEN** a user requests pricing and the generated response contains a price, currency, discount, seat minimum, or contract term, **WHEN** any claim is absent from or contradicts the versioned approved pricing source, **THEN** block the response and trigger the approved pricing fallback.
+>
+> Release requires 100% support across all pricing fixtures, zero critical pricing failures, and Cohen’s κ ≥ 0.60 for the semantic judge.
 
----
+### B. UX / Design · Fallback experience
 
-_Save this to `03-eval-suites/lab-2-eval-spec.md` in your repo (the repo is your submission). It underpins the Eval Results slide of your final pitch deck._
+> When pricing cannot be verified, do not show the generated price. Preserve the conversation and display: “I can’t verify the latest Enterprise pricing. View the approved pricing source or contact Sales for a current quote,” with both actions available. Do not expose a raw error, blank response, or unverified price.
 
-_Generated by the M3 Eval Spec Builder._
+### C. Leadership · Bi-weekly update
 
+> Enforcing zero unsupported pricing claims protects $50K+ Enterprise accounts from contract disputes and legal review. Coverage target: 100% of versioned pricing fixtures, with critical failures blocking release and results reviewed weekly.
