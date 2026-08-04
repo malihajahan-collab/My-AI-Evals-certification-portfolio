@@ -1,48 +1,59 @@
-# Module 4 · Eval Gate Map · Ascend IQ Copilot
+# Lab 1 · Eval Gate Map · Ascend IQ
 
-_Generated from the M4 Eval Gate Mapping Tool._
+## Gate definitions
 
-## Context
+- **Hard:** Automatically blocks promotion when the threshold fails.
+- **Soft:** Requires documented review and approval before promotion.
+- **Advisory:** Warns and creates a follow-up action but does not block promotion.
 
-Eng flagged 5 verified failures in the Ascend IQ data log. (Row 14, refused legal query, was correctly Pass and is not mapped.) Each row below assigns a severity (Advisory · Soft · Hard) and a pipeline placement (Pull Request · Staging Build · Release Build).
+## Gate map
 
-## Gate Map
+| Row | Failure mode | Severity | Primary placement | Rationale |
+|---:|---|:---:|---|---|
+| 01 | Hallucination · Stale Pricing | **Hard** | **Pull Request** | A versioned pricing fixture can catch the `$49` versus `$59` contradiction cheaply before Staging. Incorrect customer-facing pricing can jeopardize $50K+ Enterprise contracts, trigger disputes, and create legal-review exposure. |
+| 17 | Tone · Slang Detected | **Advisory** | **Pull Request** | A deterministic keyword and brand-style check can warn developers immediately. Ordinary slang may reduce enterprise credibility and campaign effectiveness, but it does not justify blocking an otherwise safe release. |
+| 05 | Hallucination · False Promise | **Hard** | **Staging** | Entity validation and claim-to-source entailment must prevent unsupported external commitments. Invented speaker confirmations can cause public retractions, partner escalation, and erosion of customer trust. |
+| 08 | Hallucination · Unsupported Competitor Claim | **Hard** | **Staging** | Source-grounded semantic evaluation is required for comparative claims. Unsupported statements about a named competitor can cause disputes, legal-review costs, false-advertising or defamation exposure, and brand damage. |
+| 03 | Latency · Exceeded Maximum Threshold | **Soft** | **Staging** | Production-like model, retrieval, and concurrency testing is needed to measure end-to-end latency. Sustained delays can reduce adoption, increase abandonment, and contribute to enterprise churn, while documented workload exceptions may justify approval. |
 
-| Row | Failure Mode | Severity | Placement | Rationale |
-|---|---|---|---|---|
-| 01 | Hallucination · Stale Pricing | 🔴 Hard | Staging Build | Unsupported pricing can cause underquoting, lost revenue, failed sales, customer disputes, and misleading-pricing exposure. Because pricing errors can directly affect purchasing decisions, critical contradictions must block promotion. |
-| 17 | Tone · Slang Detected | 🔵 Advisory | Pull Request | Repeated off-brand language can weaken enterprise credibility, reduce sales-message conversion, and gradually erode customer trust. Because ordinary slang presents limited immediate harm, it should generate an advisory warning rather than block release. |
-| 05 | Hallucination · False Promise | 🔴 Hard | Staging Build | Inventing confirmed speakers or commitments can force public corrections, damage partner relationships, trigger customer complaints, and erode brand trust. Externally published confirmation claims must be supported by authoritative evidence. |
-| 08 | Hallucination · Contradicts Specs | 🔴 Hard | Staging Build | Unsupported negative claims about a named competitor can create false-advertising or defamation exposure, competitor disputes, legal rev costs, and reputational damage. Unsupported comparative claims should block promotion. |
-| 03 | Latency · Exceeded Max Threshold | 🟡 Soft | Staging Build | Sustained response delays can increase abandonment, reduce feature adoption and task completion, raise support costs, breach enterprise service expectations, and contribute to churn. Occasional complex requests may use a documented exception threshold. |
+## Layered enforcement
 
-## Sample Interactions (for reference)
+The primary placement is the earliest decisive gate, not the only control:
 
-**Row 01 · Hallucination · Stale Pricing**
-- Input: What is InsightFlow's pricing for Enterprise?
-- Output: InsightFlow Enterprise starts at $49/user/month with a 10-seat minimum.
-- Eng reasoning: Hallucination, invented pricing numbers not in the source data.
+- **Pull Request:** deterministic source comparisons, entity and keyword rules, style checks, and replayed fixtures with no live model calls.
+- **Staging:** semantic entailment, unseen variations, retrieval behavior, and production-like performance tests.
+- **Release:** defense-in-depth checks, approved exceptions, rollback readiness, and final promotion state.
 
-**Row 17 · Tone · Slang Detected**
-- Input: Draft a cold email about our new feature.
-- Output: Hey! Check out this killer new feature, it's a total game changer for your stack!
-- Eng reasoning: Tone, slang violates brand-voice guidelines.
+The semantic LLM-as-Judge is not approved as a blocking control while calibration remains at **Cohen’s κ = −0.286**. Hard semantic gates require either deterministic enforcement or a recalibrated judge meeting **κ ≥ 0.60**. Until then, failure to establish an approved blocking control holds promotion for the affected P0/P1 claim class.
 
-**Row 05 · Hallucination · False Promise**
-- Input: List the confirmed speakers for SaaStr.
-- Output: Confirmed speakers include Jason Lemkin, Aaron Levie, and Sam Altman.
-- Eng reasoning: Hallucination, Sam Altman is not on the confirmed speaker list.
+## Sample-interaction references
 
-**Row 08 · Hallucination · Contradicts Specs**
-- Input: Compare our API rate limits to Competitor Z.
-- Output: Our API is robust and developer-friendly. Competitor Z is known for strict throttling.
-- Eng reasoning: Hallucination, fabricates a comparison and disparages a named competitor.
+### Row 01 · Stale Pricing
 
-**Row 03 · Latency · Exceeded Max Threshold**
-- Input: Summarize the top 3 complaints from DataViz's G2 reviews.
-- Output: Users report issues with mobile load times, lack of dark mode, and steep learning curve.
-- Eng reasoning: Latency, response time exceeded the max threshold (4.2s vs target 2.0s).
+- **Input:** What is InsightFlow's pricing for Enterprise?
+- **Output:** InsightFlow Enterprise starts at $49/user/month with a 10-seat minimum.
+- **Verified failure:** The approved price is $59/user/month.
 
----
+### Row 17 · Slang Detected
 
-_Lab artifact for Module 4, AI Evals Certification, Product School._
+- **Input:** Draft a cold email about our new feature.
+- **Output:** Hey! Check out this killer new feature, it's a total game changer for your stack!
+- **Verified failure:** “Killer” and “game changer” violate the professional brand voice.
+
+### Row 05 · False Promise
+
+- **Input:** List the confirmed speakers for SaaStr.
+- **Output:** Confirmed speakers include Jason Lemkin, Aaron Levie, and Sam Altman.
+- **Verified failure:** Sam Altman is invited or tentative, not confirmed.
+
+### Row 08 · Unsupported Competitor Claim
+
+- **Input:** Compare our API rate limits to Competitor Z.
+- **Output:** Our API is robust and developer-friendly. Competitor Z is known for strict throttling.
+- **Verified failure:** Competitor Z supports 1,000 requests per minute versus Ascend’s 500; the negative comparison is unsupported.
+
+### Row 03 · Excess Latency
+
+- **Input:** Summarize the top three complaints from DataViz's G2 reviews.
+- **Observed result:** Response time was 4.2 seconds against a 2.0-second standard-request target.
+- **Verified failure:** The response exceeded the defined latency target.
